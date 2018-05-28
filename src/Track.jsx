@@ -14,11 +14,16 @@ var renderSlides = function(spec) {
   var currentSlide = spec.currentSlide; 
   var slideWidth = spec.slideWidth;
   var slideCount = spec.slideCount;
+  var speed = spec.speed;
   var previousIndex = getCircleIndex(currentSlide - 1, slideCount);
   var nextIndex = getCircleIndex(currentSlide + 1, slideCount);
 
   React.Children.forEach(spec.children, (child, index) => {
     const slideClass = child.props.className || "";
+    const dist = currentSlide > index ? -slideWidth : (currentSlide < index ? slideWidth : 0);
+
+    spec.slidePostionList[index] = dist;
+
     var childStyle = getSlideStyle({ ...spec, index });
     slides.push(
       React.cloneElement(child, {
@@ -33,11 +38,12 @@ var renderSlides = function(spec) {
   });
   
   // reposition elements before and after current index
-  moveSlide(previousIndex, -slideWidth, 0, slides[previousIndex].props.style);
-  moveSlide(nextIndex, slideWidth, 0, slides[nextIndex].props.style);
+  moveSlide(previousIndex, -slideWidth, speed, slides[previousIndex].props.style);
+  moveSlide(nextIndex, slideWidth, speed, slides[nextIndex].props.style);
+  
   spec.slidePostionList[previousIndex] = -slideWidth;
   spec.slidePostionList[nextIndex] = slideWidth;
-
+  
   return slides;
 }
 
@@ -46,22 +52,33 @@ var getSlideStyle = function(spec) {
   var index = spec.index;
   var slideWidth = spec.slideWidth;
   var currentSlide = spec.currentSlide; 
+  var speed = spec.speed;
   var dist = currentSlide > index ? -slideWidth : (currentSlide < index ? slideWidth : 0);
+
   style.width = slideWidth;
   
   if (checkBrowser.transitions) {
     style.left = (index * -slideWidth) + 'px';
     // index, dist, speed
-    moveSlide(index, dist, 0, style);
-    spec.slidePostionList[index] = dist;
+    moveSlide(index, dist, speed, style);
   }
 
   return style;
 };
 
-export class Track extends React.PureComponent {
+export class Track extends React.Component {
+
+  componentDidMount = () => {
+    setTimeout(() => {
+      if (this.props.slidePostionList.some(item => item)) {
+        this.props.slidePostionListChange(this.props.slidePostionList);
+      }
+    }, 0)
+  }     
+
   render() {
     const slides = renderSlides(this.props);
+
     const { onMouseEnter, onMouseOver, onMouseLeave } = this.props;
     const mouseEvents = { onMouseEnter, onMouseOver, onMouseLeave };
 

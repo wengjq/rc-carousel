@@ -41,25 +41,18 @@ export const getTrackCSS = spec => {
     transition: "",
     WebkitTransition: ""
   };
-  //if (spec.useTransform) {
-    let WebkitTransform = !spec.vertical
-      ? "translate3d(" + spec.left + "px, 0px, 0px)"
-      : "translate3d(0px, " + spec.left + "px, 0px)";
-    let transform = !spec.vertical
-      ? "translate3d(" + spec.left + "px, 0px, 0px)"
-      : "translate3d(0px, " + spec.left + "px, 0px)";
-    let msTransform = !spec.vertical
-      ? "translateX(" + spec.left + "px)"
-      : "translateY(" + spec.left + "px)";
-    style = {
-      ...style,
-      WebkitTransform,
-      transform,
-      msTransform
-    };
- // } else {
-    
- // }
+
+  let WebkitTransform = "translate3d(" + spec.left + "px, 0px, 0px)";
+  let transform = "translate3d(" + spec.left + "px, 0px, 0px)";
+  let msTransform ="translateX(" + spec.left + "px)";
+
+  style = {
+    ...style,
+    WebkitTransform,
+    transform,
+    msTransform
+  };
+
   if (spec.fade) style = { opacity: 1 };
   if (trackWidth) style.width = trackWidth;
   if (trackHeight) style.height = trackHeight;
@@ -80,6 +73,65 @@ export const initializedState = spec => {
     listWidth,
     trackWidth,
     currentSlide
+  };
+
+  return state;
+};
+
+export const swipeStart = (e) => {
+  return {
+    dragging: true,
+    isScrolling: false,
+    touchObject: {
+      startX: e.touches ? e.touches[0].pageX : e.clientX,
+      startY: e.touches ? e.touches[0].pageY : e.clientY
+    }
+  };
+};
+
+export const swipeMove = (e, spec) => {
+  if (e.touches.length > 1 || e.scale && e.scale !== 1) return;
+
+  let touches = e.touches[0];
+  let state = {};
+
+  const {
+    slideCount,
+    touchObject,
+    speed
+  } = spec;
+
+  let slidePostionList = spec.slidePostionList;
+  let isScrolling = spec.isScrolling;
+  let currentIndex = spec.currentSlide;
+  let lastIndex = getCircleIndex(currentIndex - 1, slideCount);
+  let nextIndex = getCircleIndex(currentIndex + 1, slideCount);
+
+  // measure change in x and y
+  let delta = {
+    x: touches.pageX - touchObject.startX,
+    y: touches.pageY - touchObject.startY
+  }
+  // determine if scrolling test has run
+  if (typeof isScrolling == 'undefined') {
+    isScrolling = !!(isScrolling || Math.abs(delta.x) < Math.abs(delta.y));
+  }
+
+  if (!isScrolling) {
+    //e.preventDefault();
+    moveSlide(lastIndex, delta.x + slidePostionList[lastIndex], speed, spec.children[lastIndex].props.style);
+    moveSlide(currentIndex, delta.x + slidePostionList[currentIndex], speed, spec.children[currentIndex].props.style);
+    moveSlide(nextIndex, delta.x + slidePostionList[nextIndex], speed, spec.children[nextIndex].props.style);
+  }
+
+  slidePostionList[lastIndex] = delta.x + slidePostionList[lastIndex];
+  slidePostionList[currentIndex] = delta.x + slidePostionList[currentIndex];
+  slidePostionList[nextIndex] = delta.x + slidePostionList[nextIndex];
+ 
+  state = {
+    ...state,
+    touchObject,
+    slidePostionList
   };
 
   return state;

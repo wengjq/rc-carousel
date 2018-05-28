@@ -1,13 +1,17 @@
 import React from 'react';
+import ReactDOM from "react-dom";
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import debounce from "lodash.debounce";
 import { Track } from "./Track";
 import {
   getTrackCSS,
   initializedState,
   checkBrowser,
   getCircleIndex,
-  moveSlide
+  moveSlide,
+  swipeStart,
+  swipeMove
 } from "./utils";
 
 export default class Innercarousel extends React.Component {
@@ -15,28 +19,89 @@ export default class Innercarousel extends React.Component {
     super(props);
     this.list = null;
     this.track = null;
-    
+
     this.state = {
       currentSlide: this.props.initialSlide,
       slideCount: React.Children.count(this.props.children),
+      trackStyle: {},
       slidePostionList: [],
       slideWidth: 0,
       listWidth: 0,
-      trackWidth: 0
+      trackWidth: 0,
+      dragging: false
     };
+
+    this.debouncedResize = null;
   }
 
-  componentDidMount = () => {
-    let spec = { listRef: this.list, trackRef: this.track, ...this.props };
-    let updatedState = initializedState(spec);
+  slidePostionListChange = (slidePostionList) => {
+    this.setState({slidePostionList}, this.autoPlay());
+  }
 
+  onWindowResized = () => {
+    if (this.debouncedResize) this.debouncedResize.cancel();
+    this.debouncedResize = debounce(() => this.resizeWindow(), 50);
+    this.debouncedResize();
+  };
+
+  resizeWindow = () => {
+    if (!ReactDOM.findDOMNode(this.track)) return;
+    let spec = {
+      listRef: this.list,
+      trackRef: this.track,
+      ...this.props,
+      ...this.state
+    };
+    this.updateState(spec);
+  };
+
+  swipeStart = e => {
+    let state = swipeStart(e, this.props.swipe);
+    //state !== "" && this.setState(state);
+  };
+
+  swipeMove = e => {
+    let state = swipeMove(e, {
+      ...this.props,
+      ...this.state,
+      trackRef: this.track,
+      listRef: this.list,
+      slideIndex: this.state.currentSlide
+    });
+
+    if (!state) return;
+    //if (state["swiping"]) {
+    //  this.clickable = false;
+    //}
+    this.setState(state);
+  };
+
+  componentDidMount = () => {
+    let spec = { 
+      listRef: this.list, 
+      trackRef: this.track, 
+      ...this.props,
+      ...this.state
+    };
+
+    this.updateState(spec)
+
+    if (window.addEventListener) {
+      window.addEventListener("resize", this.onWindowResized);
+    } else {
+      window.attachEvent("onresize", this.onWindowResized);
+    }
+  };
+
+  updateState = (spec, callback) => {
+    let updatedState = initializedState(spec);
     spec = { ...spec, ...updatedState, slideIndex: updatedState.currentSlide };
-    
+
     let trackStyle = getTrackCSS(spec);
-    
+
     updatedState["trackStyle"] = trackStyle;
 
-    this.setState(updatedState, this.autoPlay());
+    this.setState(updatedState, callback);
   };
 
   slideHandler = (toIndex, slideSpeed, dontAnimate = false) => {
@@ -49,10 +114,15 @@ export default class Innercarousel extends React.Component {
 
     if (checkBrowser.transitions) {
       // 1: backward, -1: forward
+      return
       var direction = Math.abs(currentIndex - toIndex) / (currentIndex - toIndex); 
       let naturalDirection = direction;
-      console.log(getCircleIndex(toIndex, slideCount));
+      
+      if (!this.state.slidePostionList.some(item => item)) {
+        return;
+      }
       direction = -this.state.slidePostionList[getCircleIndex(toIndex, slideCount)] / slideWidth;
+      if (isNaN(direction)) return;
       // if going forward but to < index, use to = slides.length + to
       // if going backward but to > index, use to = -slides.length + to
       if (direction !== naturalDirection) toIndex = -direction * this.state.slideCount.length + toIndex;
@@ -61,7 +131,7 @@ export default class Innercarousel extends React.Component {
     let diff = Math.abs(currentIndex - toIndex) - 1;
 
     // move all the slides between index and to in the right direction
-    while (diff--) move( getCircleIndex((toIndex > currentIndex ? toIndex : currentIndex, slideCount) - diff - 1), slideWidth * direction, 0);
+    while (diff--) move(getCircleIndex((toIndex > currentIndex ? toIndex : currentIndex, slideCount) - diff - 1), slideWidth * direction, 0);
       
     toIndex = getCircleIndex(toIndex, slideCount);
     
@@ -76,6 +146,18 @@ export default class Innercarousel extends React.Component {
       currentSlide: toIndex
     });
   };
+
+  transitionEnd = () => {
+    if (this.autoplayTimer) {
+      clearTimeout(this.autoplayTimer);
+    }
+
+    let nextIndex = this.state.currentSlide + 1;
+
+    this.autoplayTimer = setTimeout(() => {
+      this.slideHandler(nextIndex);
+    }, this.props.autoplaySpeed + 50);
+  }
       
   autoPlay = playType => {
     if (!this.props.autoplay) return;
@@ -86,7 +168,11 @@ export default class Innercarousel extends React.Component {
 
     let nextIndex = this.state.currentSlide + 1;
 
-    this.autoplayTimer = setTimeout(this.slideHandler(nextIndex), this.props.autoplaySpeed + 50);
+    this.autoplayTimer = setTimeout(() => {
+      this.slideHandler(nextIndex);
+    }, this.props.autoplaySpeed + 50);
+
+    //setTimeout(this.slideHandler(nextIndex), this.props.autoplaySpeed + 50);
   
 /*    if (this.autoplayTimer) {
       clearInterval(this.autoplayTimer);
@@ -153,7 +239,12 @@ export default class Innercarousel extends React.Component {
     };
 
     let listProps = { 
-      className: "carousel-list"/*,
+      className: "carousel-list",
+      onTransitionEnd: this.transitionEnd,
+      onTouchStart: this.swipeStart,
+      onTouchMove: this.state.dragging ? this.swipeMove : null,
+      onTouchEnd: this.swipeEnd
+      /*,
       onClick: this.clickHandler,
       onMouseDown: touchMove ? this.swipeStart : null,
       onMouseMove: this.state.dragging && touchMove ? this.swipeMove : null,
@@ -168,7 +259,7 @@ export default class Innercarousel extends React.Component {
 		return (
 			<div className={className}>
         <div ref={this.listRefHandler} {...listProps}>
-          <Track ref={this.trackRefHandler} {...trackProps}>
+          <Track ref={this.trackRefHandler} {...trackProps} slidePostionListChange = {slidePostionList => this.slidePostionListChange(slidePostionList)} >
             {this.props.children}
           </Track>
         </div>
