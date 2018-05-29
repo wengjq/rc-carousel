@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import Innercarousel from "./Innercarousel";
+import InnerCarousel from "./inner-carousel";
 
 export default class Carouseleffect extends React.Component {
   static defaultProps = {
@@ -26,9 +26,9 @@ export default class Carouseleffect extends React.Component {
     settings = { ...this.defaultProps, ...this.props };
 
 		return (
-			<Innercarousel {...settings}>
+			<InnerCarousel {...settings}>
         {children}
-      </Innercarousel>
+      </InnerCarousel>
 		);
 	}
 }

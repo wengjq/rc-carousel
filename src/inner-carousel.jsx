@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import debounce from "lodash.debounce";
-import { Track } from "./Track";
+import { Track } from "./track";
 import {
   getTrackCSS,
   initializedState,
@@ -11,10 +11,11 @@ import {
   getCircleIndex,
   moveSlide,
   swipeStart,
-  swipeMove
+  swipeMove,
+  swipeEnd
 } from "./utils";
 
-export default class Innercarousel extends React.Component {
+export default class InnerCarousel extends React.Component {
   constructor(props) {
     super(props);
     this.list = null;
@@ -56,8 +57,8 @@ export default class Innercarousel extends React.Component {
   };
 
   swipeStart = e => {
-    let state = swipeStart(e, this.props.swipe);
-    //state !== "" && this.setState(state);
+    let state = swipeStart(e, this.state);
+    state !== "" && this.setState(state);
   };
 
   swipeMove = e => {
@@ -73,8 +74,23 @@ export default class Innercarousel extends React.Component {
     //if (state["swiping"]) {
     //  this.clickable = false;
     //}
+
     this.setState(state);
   };
+
+  swipeEnd = e => {
+    let state = swipeEnd(e, {
+      ...this.props,
+      ...this.state,
+      trackRef: this.track,
+      listRef: this.list,
+      slideIndex: this.state.currentSlide
+    });
+
+    if (!state) return;
+    
+    this.setState(state);
+  }
 
   componentDidMount = () => {
     let spec = { 
@@ -90,6 +106,14 @@ export default class Innercarousel extends React.Component {
       window.addEventListener("resize", this.onWindowResized);
     } else {
       window.attachEvent("onresize", this.onWindowResized);
+    }
+  };
+
+  componentWillUnmount = () => {
+    if (window.addEventListener) {
+      window.removeEventListener("resize", this.onWindowResized);
+    } else {
+      window.detachEvent("onresize", this.onWindowResized);
     }
   };
 
@@ -109,38 +133,40 @@ export default class Innercarousel extends React.Component {
     let slideWidth = this.state.slideWidth;
     let speed = this.props.speed || 300;
     let slideCount = this.state.slideCount;
-
+    return
     if (currentIndex === toIndex) return;
 
     if (checkBrowser.transitions) {
       // 1: backward, -1: forward
-      return
       var direction = Math.abs(currentIndex - toIndex) / (currentIndex - toIndex); 
       let naturalDirection = direction;
       
       if (!this.state.slidePostionList.some(item => item)) {
         return;
       }
+
       direction = -this.state.slidePostionList[getCircleIndex(toIndex, slideCount)] / slideWidth;
       if (isNaN(direction)) return;
       // if going forward but to < index, use to = slides.length + to
       // if going backward but to > index, use to = -slides.length + to
       if (direction !== naturalDirection) toIndex = -direction * this.state.slideCount.length + toIndex;
     }
-
+    
     let diff = Math.abs(currentIndex - toIndex) - 1;
 
     // move all the slides between index and to in the right direction
-    while (diff--) move(getCircleIndex((toIndex > currentIndex ? toIndex : currentIndex, slideCount) - diff - 1), slideWidth * direction, 0);
+    while (diff--) this.state.slidePostionList[getCircleIndex(toIndex > currentIndex ? toIndex : currentIndex, slideCount)] = slideWidth * direction;
       
     toIndex = getCircleIndex(toIndex, slideCount);
     
-    moveSlide(currentIndex, slideWidth * direction, slideSpeed || speed, this.props.children[currentIndex].props.style);
-    moveSlide(toIndex, 0, slideSpeed || speed, this.props.children[toIndex].props.style);
-
+    //moveSlide(currentIndex, slideWidth * direction, slideSpeed || speed, this.props.children[currentIndex].props.style);
+    //moveSlide(toIndex, 0, slideSpeed || speed, this.props.children[toIndex].props.style);
+    this.state.slidePostionList[currentIndex] = slideWidth * direction;
+    this.state.slidePostionList[toIndex] = 0;
     // get the next in place
     let nextIndex = getCircleIndex(toIndex - direction, slideCount);
-    moveSlide(nextIndex, -(slideWidth * direction), 0, this.props.children[nextIndex].props.style); 
+    this.state.slidePostionList[nextIndex] = -(slideWidth * direction);
+    //moveSlide(nextIndex, -(slideWidth * direction), 0, this.props.children[nextIndex].props.style); 
 
     this.setState({
       currentSlide: toIndex

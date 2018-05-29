@@ -1,3 +1,3 @@
-import Carouseleffect from './Carouseleffect';
+import CarouselEffect from './carousel-effect';
 
-export default Carouseleffect;
+export default CarouselEffect;

@@ -22,7 +22,7 @@ var renderSlides = function(spec) {
     const slideClass = child.props.className || "";
     const dist = currentSlide > index ? -slideWidth : (currentSlide < index ? slideWidth : 0);
 
-    spec.slidePostionList[index] = dist;
+    //spec.slidePostionList[index] = dist;
 
     var childStyle = getSlideStyle({ ...spec, index });
     slides.push(
@@ -38,11 +38,11 @@ var renderSlides = function(spec) {
   });
   
   // reposition elements before and after current index
-  moveSlide(previousIndex, -slideWidth, speed, slides[previousIndex].props.style);
-  moveSlide(nextIndex, slideWidth, speed, slides[nextIndex].props.style);
+  //moveSlide(previousIndex, -slideWidth, speed, slides[previousIndex].props.style);
+  //moveSlide(nextIndex, slideWidth, speed, slides[nextIndex].props.style);
   
-  spec.slidePostionList[previousIndex] = -slideWidth;
-  spec.slidePostionList[nextIndex] = slideWidth;
+  //spec.slidePostionList[previousIndex] = -slideWidth;
+  //spec.slidePostionList[nextIndex] = slideWidth;
   
   return slides;
 }
@@ -53,7 +53,7 @@ var getSlideStyle = function(spec) {
   var slideWidth = spec.slideWidth;
   var currentSlide = spec.currentSlide; 
   var speed = spec.speed;
-  var dist = currentSlide > index ? -slideWidth : (currentSlide < index ? slideWidth : 0);
+  var dist = spec.slidePostionList[index];
 
   style.width = slideWidth;
   
@@ -66,15 +66,7 @@ var getSlideStyle = function(spec) {
   return style;
 };
 
-export class Track extends React.Component {
-
-  componentDidMount = () => {
-    setTimeout(() => {
-      if (this.props.slidePostionList.some(item => item)) {
-        this.props.slidePostionListChange(this.props.slidePostionList);
-      }
-    }, 0)
-  }     
+export class Track extends React.Component {   
 
   render() {
     const slides = renderSlides(this.props);
