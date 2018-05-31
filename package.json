@@ -1,7 +1,7 @@
 {
-  "name": "rc-carousel-effect",
+  "name": "rc-carousel",
   "version": "1.0.0",
-  "description": "carousel effect component for react",
+  "description": "carousel component for react",
   "main": "lib/index",
   "module": "es/index", 
   "files": [
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wengjq/rc-carousel-effect.git"
+    "url": "git+https://github.com/wengjq/rc-carousel.git"
   },
   "keywords": [
     "react",
@@ -26,9 +26,9 @@
     "port": 8001
   },
   "bugs": {
-    "url": "https://github.com/wengjq/rc-carousel-effect/issues"
+    "url": "https://github.com/wengjq/rc-carousel/issues"
   },
-  "homepage": "https://github.com/wengjq/rc-carousel-effect#readme",
+  "homepage": "https://github.com/wengjq/rc-carousel#readme",
   "scripts": {
     "build": "rc-tools run build",
     "gh-pages": "rc-tools run gh-pages",

@@ -57,7 +57,10 @@ export default class InnerCarousel extends React.Component {
   };
 
   swipeStart = e => {
-    let state = swipeStart(e, this.state);
+    let state = swipeStart(e, {
+   		...this.props,
+      ...this.state
+    });
     state !== "" && this.setState(state);
   };
 
@@ -90,7 +93,7 @@ export default class InnerCarousel extends React.Component {
     if (!state) return;
     
     this.setState(state);
-  }
+  };
 
   componentDidMount = () => {
     let spec = { 
@@ -269,9 +272,12 @@ export default class InnerCarousel extends React.Component {
       onTransitionEnd: this.transitionEnd,
       onTouchStart: this.swipeStart,
       onTouchMove: this.state.dragging ? this.swipeMove : null,
-      onTouchEnd: this.swipeEnd
+      onTouchEnd: this.swipeEnd,
+      onMouseDown: this.swipeStart,
+      onMouseMove: this.state.dragging ? this.swipeMove : null,
+      onMouseUp: this.swipeEnd,
+      onMouseLeave: this.state.dragging ? this.swipeEnd : null
       /*,
-      onClick: this.clickHandler,
       onMouseDown: touchMove ? this.swipeStart : null,
       onMouseMove: this.state.dragging && touchMove ? this.swipeMove : null,
       onMouseUp: touchMove ? this.swipeEnd : null,

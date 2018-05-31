@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Carouseleffect from 'rc-carousel-effect';
+import CarouselEffect from 'rc-carousel-effect';
 import 'rc-carousel-effect/assets/index.less';
 
 class SimpleDemo extends React.Component {
 	render () {
 		return (
-			<Carouseleffect>
+			<CarouselEffect>
 				<div style={{float: "left",position: "relative"}}>
           <h3>1</h3>
         </div>
@@ -16,7 +16,7 @@ class SimpleDemo extends React.Component {
         <div style={{float: "left",position: "relative"}}>
           <h3>3</h3>
         </div>
-      </Carouseleffect>
+      </CarouselEffect>
 		)
 	}
 }

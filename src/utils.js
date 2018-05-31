@@ -91,9 +91,10 @@ export const initializedState = spec => {
 };
 
 export const swipeStart = (e, spec) => {
-
   return {
     startTime: +new Date,
+    speedTmp: spec.speed,
+    speed: 0,
     dragging: true,
     isScrolling: false,
     touchObject: {
@@ -105,18 +106,21 @@ export const swipeStart = (e, spec) => {
 };
 
 export const swipeMove = (e, spec) => {
-  if (e.touches.length > 1 || e.scale && e.scale !== 1) return;
-  
-  let touches = e.touches[0];
+  //if (e.touches.length > 1 || e.scale && e.scale !== 1) return;
+  let touchMove =  {
+    endX: e.touches ? e.touches[0].pageX : e.clientX,
+    endY: e.touches ? e.touches[0].pageY : e.clientY
+  };
+
   let state = {};
 
   const {
     slideCount,
-    touchObject,
-    speed
+    touchObject
   } = spec;
 
   let slidePostionList = spec.slidePostionList;
+  let slidePostionListTmp = spec.slidePostionListTmp;
 
   let isScrolling = spec.isScrolling;
   let currentIndex = spec.currentSlide;
@@ -125,24 +129,23 @@ export const swipeMove = (e, spec) => {
 
   // measure change in x and y
   let delta = {
-    x: touches.pageX - touchObject.startX,
-    y: touches.pageY - touchObject.startY
+    x: touchMove.endX - touchObject.startX,
+    y: touchMove.endY - touchObject.startY
   }
+
   // determine if scrolling test has run
   if (typeof isScrolling == 'undefined') {
     isScrolling = !!(isScrolling || Math.abs(delta.x) < Math.abs(delta.y));
   }
 
-  if (!isScrolling) {
-    //e.preventDefault();
-    /*moveSlide(lastIndex, delta.x + slidePostionList[lastIndex], speed, spec.children[lastIndex].props.style);
-    moveSlide(currentIndex, delta.x + slidePostionList[currentIndex], speed, spec.children[currentIndex].props.style);
-    moveSlide(nextIndex, delta.x + slidePostionList[nextIndex], speed, spec.children[nextIndex].props.style);*/
-    slidePostionList[lastIndex] = delta.x + slidePostionList[lastIndex];
-    slidePostionList[currentIndex] = delta.x + slidePostionList[currentIndex];
-    slidePostionList[nextIndex] = delta.x + slidePostionList[nextIndex];
-  }
+  let swipeDist = delta.x;
 
+  if (!isScrolling) {
+    slidePostionList[lastIndex] = swipeDist + slidePostionListTmp[lastIndex];
+    slidePostionList[currentIndex] = swipeDist + slidePostionListTmp[currentIndex];
+    slidePostionList[nextIndex] = swipeDist + slidePostionListTmp[nextIndex];
+  }
+  
   state = {
     ...state,
     touchObject,
@@ -156,8 +159,20 @@ export const swipeMove = (e, spec) => {
 
 export const swipeEnd = (e, spec) => {
   let state = {};
+  let dragging = spec.dragging;
+
+  if (!dragging) {
+    e.preventDefault();
+    return {};
+  }
+  state = {
+    dragging: false,
+    touchObject: {},
+    speed: spec.speedTmp
+  };
+
   let delta = spec.delta;
-  let duration = +new Date - spec.startTime;
+  let duration = (+new Date) - spec.startTime;
   let slideWidth = spec.slideWidth;
   let slideCount = spec.slideCount;
   // determine if slide attempt triggers next/prev slide
