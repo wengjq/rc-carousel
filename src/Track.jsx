@@ -12,24 +12,22 @@ var renderSlides = function(spec) {
   var slides = [];
   var childrenCount = React.Children.count(spec.children);
   var currentSlide = spec.currentSlide; 
+  var isSpecialSlideCount = spec.isSpecialSlideCount;
   var slideWidth = spec.slideWidth;
   var slideCount = spec.slideCount;
   var speed = spec.speed;
-  var previousIndex = getCircleIndex(currentSlide - 1, slideCount);
   var nextIndex = getCircleIndex(currentSlide + 1, slideCount);
 
   React.Children.forEach(spec.children, (child, index) => {
     const slideClass = child.props.className || "";
-    const dist = currentSlide > index ? -slideWidth : (currentSlide < index ? slideWidth : 0);
 
-    //spec.slidePostionList[index] = dist;
+    var childStyle = getSlideStyle({ ...spec, index, nextIndex });
 
-    var childStyle = getSlideStyle({ ...spec, index });
     slides.push(
       React.cloneElement(child, {
         "data-index": index,
         className: slideClass,
-        style: { outline: "none", ...(child.props.style || {}), ...childStyle },
+        style: { outline: "none", userSelect: "none", ...(child.props.style || {}), ...childStyle },
         onClick: e => {
           child.props && child.props.onClick && child.props.onClick(e);
         }
@@ -37,13 +35,28 @@ var renderSlides = function(spec) {
     );
   });
   
-  // reposition elements before and after current index
-  //moveSlide(previousIndex, -slideWidth, speed, slides[previousIndex].props.style);
-  //moveSlide(nextIndex, slideWidth, speed, slides[nextIndex].props.style);
-  
-  //spec.slidePostionList[previousIndex] = -slideWidth;
-  //spec.slidePostionList[nextIndex] = slideWidth;
-  
+  if (isSpecialSlideCount) {
+    React.Children.forEach(spec.children, (child, index) => {
+      const slideClass = child.props.className || "";
+
+      index = index + 2;
+
+      var childStyle = getSlideStyle({ ...spec, index });
+
+      slides.push(
+        React.cloneElement(child, {
+          key: index,
+          "data-index": index,
+          className: slideClass,
+          style: { outline: "none", userSelect: "none", ...(child.props.style || {}), ...childStyle },
+          onClick: e => {
+            child.props && child.props.onClick && child.props.onClick(e);
+          }
+        })
+      );
+    });
+  }
+
   return slides;
 }
 
@@ -54,6 +67,7 @@ var getSlideStyle = function(spec) {
   var currentSlide = spec.currentSlide; 
   var speed = spec.speed;
   var dist = spec.slidePostionList[index];
+  var slideCount = spec.slideCount;
 
   style.width = slideWidth;
   

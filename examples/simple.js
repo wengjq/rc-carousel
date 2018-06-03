@@ -1,12 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import CarouselEffect from 'rc-carousel-effect';
-import 'rc-carousel-effect/assets/index.less';
+import Carousel from 'rc-carousel';
+import 'rc-carousel/assets/index.less';
 
 class SimpleDemo extends React.Component {
 	render () {
+    const settings = {
+      speed: 500,
+      autoplay: false,
+      dots: true,
+      arrows: true
+    };
+
 		return (
-			<CarouselEffect>
+			<Carousel {...settings}>
 				<div style={{float: "left",position: "relative"}}>
           <h3>1</h3>
         </div>
@@ -16,7 +23,8 @@ class SimpleDemo extends React.Component {
         <div style={{float: "left",position: "relative"}}>
           <h3>3</h3>
         </div>
-      </CarouselEffect>
+
+      </Carousel>
 		)
 	}
 }

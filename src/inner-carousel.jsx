@@ -9,11 +9,12 @@ import {
   initializedState,
   checkBrowser,
   getCircleIndex,
-  moveSlide,
   swipeStart,
   swipeMove,
   swipeEnd
 } from "./utils";
+import { Dots } from "./dots";
+import { PrevArrow, NextArrow } from "./arrows";
 
 export default class InnerCarousel extends React.Component {
   constructor(props) {
@@ -29,14 +30,12 @@ export default class InnerCarousel extends React.Component {
       slideWidth: 0,
       listWidth: 0,
       trackWidth: 0,
-      dragging: false
+      dragging: false,
+      autoplaying: null,
+      isSpecialSlideCount: false
     };
 
     this.debouncedResize = null;
-  }
-
-  slidePostionListChange = (slidePostionList) => {
-    this.setState({slidePostionList}, this.autoPlay());
   }
 
   onWindowResized = () => {
@@ -61,6 +60,7 @@ export default class InnerCarousel extends React.Component {
    		...this.props,
       ...this.state
     });
+
     state !== "" && this.setState(state);
   };
 
@@ -74,9 +74,6 @@ export default class InnerCarousel extends React.Component {
     });
 
     if (!state) return;
-    //if (state["swiping"]) {
-    //  this.clickable = false;
-    //}
 
     this.setState(state);
   };
@@ -103,7 +100,9 @@ export default class InnerCarousel extends React.Component {
       ...this.state
     };
 
-    this.updateState(spec)
+    this.updateState(spec, () => {
+      this.props.autoplay && this.autoPlay("update");
+    });
 
     if (window.addEventListener) {
       window.addEventListener("resize", this.onWindowResized);
@@ -131,29 +130,27 @@ export default class InnerCarousel extends React.Component {
     this.setState(updatedState, callback);
   };
 
-  slideHandler = (toIndex, slideSpeed, dontAnimate = false) => {
+  slideHandler = (toIndex) => {
     let currentIndex = this.state.currentSlide;
     let slideWidth = this.state.slideWidth;
     let speed = this.props.speed || 300;
     let slideCount = this.state.slideCount;
-    return
+    const dragging = this.state.dragging;
+
+    if (dragging) return;
+
     if (currentIndex === toIndex) return;
 
-    if (checkBrowser.transitions) {
-      // 1: backward, -1: forward
-      var direction = Math.abs(currentIndex - toIndex) / (currentIndex - toIndex); 
-      let naturalDirection = direction;
-      
-      if (!this.state.slidePostionList.some(item => item)) {
-        return;
-      }
+    // 1: backward, -1: forward
+    var direction = Math.abs(currentIndex - toIndex) / (currentIndex - toIndex); 
+    let naturalDirection = direction;
+  
+    direction = -this.state.slidePostionList[getCircleIndex(toIndex, slideCount)] / slideWidth;
 
-      direction = -this.state.slidePostionList[getCircleIndex(toIndex, slideCount)] / slideWidth;
-      if (isNaN(direction)) return;
-      // if going forward but to < index, use to = slides.length + to
-      // if going backward but to > index, use to = -slides.length + to
-      if (direction !== naturalDirection) toIndex = -direction * this.state.slideCount.length + toIndex;
-    }
+    if (isNaN(direction)) return;
+    // if going forward but to < index, use to = slides.length + to
+    // if going backward but to > index, use to = -slides.length + to
+    if (direction !== naturalDirection) toIndex = -direction * slideCount + toIndex;
     
     let diff = Math.abs(currentIndex - toIndex) - 1;
 
@@ -162,30 +159,25 @@ export default class InnerCarousel extends React.Component {
       
     toIndex = getCircleIndex(toIndex, slideCount);
     
-    //moveSlide(currentIndex, slideWidth * direction, slideSpeed || speed, this.props.children[currentIndex].props.style);
-    //moveSlide(toIndex, 0, slideSpeed || speed, this.props.children[toIndex].props.style);
     this.state.slidePostionList[currentIndex] = slideWidth * direction;
     this.state.slidePostionList[toIndex] = 0;
     // get the next in place
     let nextIndex = getCircleIndex(toIndex - direction, slideCount);
+
     this.state.slidePostionList[nextIndex] = -(slideWidth * direction);
-    //moveSlide(nextIndex, -(slideWidth * direction), 0, this.props.children[nextIndex].props.style); 
 
     this.setState({
-      currentSlide: toIndex
+      currentSlide: toIndex,
+      autoplaying: "end"
     });
   };
 
   transitionEnd = () => {
-    if (this.autoplayTimer) {
-      clearTimeout(this.autoplayTimer);
-    }
+    const autoplaying = this.state.autoplaying;
 
-    let nextIndex = this.state.currentSlide + 1;
+    if (autoplaying !== "end") return;
 
-    this.autoplayTimer = setTimeout(() => {
-      this.slideHandler(nextIndex);
-    }, this.props.autoplaySpeed + 50);
+    this.props.autoplay && this.autoPlay("update");
   }
       
   autoPlay = playType => {
@@ -195,37 +187,28 @@ export default class InnerCarousel extends React.Component {
       clearTimeout(this.autoplayTimer);
     }
 
+    const autoplaying = this.state.autoplaying;
+    
+    if (playType === "update") {
+      if (
+        autoplaying === "hovered" ||
+        autoplaying === "paused"
+      ) {
+        return;
+      }
+    } else if (playType === "leave") {
+      if (autoplaying === "paused") {
+        return;
+      }
+    } 
+
     let nextIndex = this.state.currentSlide + 1;
 
     this.autoplayTimer = setTimeout(() => {
       this.slideHandler(nextIndex);
     }, this.props.autoplaySpeed + 50);
 
-    //setTimeout(this.slideHandler(nextIndex), this.props.autoplaySpeed + 50);
-  
-/*    if (this.autoplayTimer) {
-      clearInterval(this.autoplayTimer);
-    }
-    const autoplaying = this.state.autoplaying;
-    if (playType === "update") {
-      if (
-        autoplaying === "hovered" ||
-        autoplaying === "focused" ||
-        autoplaying === "paused"
-      ) {
-        return;
-      }
-    } else if (playType === "leave") {
-      if (autoplaying === "paused" || autoplaying === "focused") {
-        return;
-      }
-    } else if (playType === "blur") {
-      if (autoplaying === "paused" || autoplaying === "hovered") {
-        return;
-      }
-    }
-    this.autoplayTimer = setInterval(this.play, this.props.autoplaySpeed + 50);
-    this.setState({ autoplaying: "playing" });*/
+    this.setState({ autoplaying: "playing" });
   };
 
   pause = pauseType => {
@@ -233,20 +216,27 @@ export default class InnerCarousel extends React.Component {
       clearInterval(this.autoplayTimer);
       this.autoplayTimer = null;
     }
-    /*const autoplaying = this.state.autoplaying;
+    const autoplaying = this.state.autoplaying;
+
     if (pauseType === "paused") {
       this.setState({ autoplaying: "paused" });
-    } else if (pauseType === "focused") {
-      if (autoplaying === "hovered" || autoplaying === "playing") {
-        this.setState({ autoplaying: "focused" });
-      }
     } else {
-      // pauseType  is 'hovered'
       if (autoplaying === "playing") {
         this.setState({ autoplaying: "hovered" });
       }
-    }*/
+    }
   };
+
+  clickHandler = e => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
+  onTrackOver = () => this.props.autoplay && this.pause("hovered");
+
+  onTrackLeave = () => this.props.autoplay 
+                    && this.state.autoplaying === "hovered" 
+                    && this.autoPlay("leave");
 
   listRefHandler = ref => (this.list = ref);
 
@@ -256,45 +246,68 @@ export default class InnerCarousel extends React.Component {
     let className = classNames("carousel-initialized", this.props.className, {
       "carousel-container": true
     });
+    const { pauseOnHover } = this.props;
+
     let spec = { ...this.props, ...this.state };
 
     let trackProps = {
       ...this.props, 
       ...this.state,
       trackStyle: spec["trackStyle"],
-      onMouseEnter: null,
-      onMouseLeave: null,
-      onMouseOver: null
+      onMouseEnter: pauseOnHover ? this.onTrackOver : null,
+      onMouseLeave: pauseOnHover ? this.onTrackLeave : null,
+      onMouseOver: pauseOnHover ? this.onTrackOver : null
     };
+
+    var dots;
+
+    if (this.props.dots) {
+      let dotProps = {
+        ...this.props, 
+        ...this.state,
+        clickHandler: this.slideHandler
+      };
+
+      dots = <Dots {...dotProps} />;
+    }
+
+    var prevArrow, nextArrow;
+
+    let arrowProps = {
+      ...this.props, 
+      ...this.state,
+      clickHandler: this.slideHandler
+    };
+
+    if (this.props.arrows) {
+      prevArrow = <PrevArrow {...arrowProps} />;
+      nextArrow = <NextArrow {...arrowProps} />;
+    }
 
     let listProps = { 
       className: "carousel-list",
+      onClick: this.clickHandler,
       onTransitionEnd: this.transitionEnd,
       onTouchStart: this.swipeStart,
       onTouchMove: this.state.dragging ? this.swipeMove : null,
       onTouchEnd: this.swipeEnd,
+      onTouchCancel: this.state.dragging ? this.swipeEnd : null,
       onMouseDown: this.swipeStart,
       onMouseMove: this.state.dragging ? this.swipeMove : null,
       onMouseUp: this.swipeEnd,
       onMouseLeave: this.state.dragging ? this.swipeEnd : null
-      /*,
-      onMouseDown: touchMove ? this.swipeStart : null,
-      onMouseMove: this.state.dragging && touchMove ? this.swipeMove : null,
-      onMouseUp: touchMove ? this.swipeEnd : null,
-      onMouseLeave: this.state.dragging && touchMove ? this.swipeEnd : null,
-      onTouchStart: touchMove ? this.swipeStart : null,
-      onTouchMove: this.state.dragging && touchMove ? this.swipeMove : null,
-      onTouchEnd: touchMove ? this.swipeEnd : null,
-      onTouchCancel: this.state.dragging && touchMove ? this.swipeEnd : null*/
     };
 
 		return (
 			<div className={className}>
+        {!this.props.unslick ? prevArrow : ""}
         <div ref={this.listRefHandler} {...listProps}>
-          <Track ref={this.trackRefHandler} {...trackProps} slidePostionListChange = {slidePostionList => this.slidePostionListChange(slidePostionList)} >
+          <Track ref={this.trackRefHandler} {...trackProps} >
             {this.props.children}
           </Track>
         </div>
+        {!this.props.unslick ? nextArrow : ""}
+        {!this.props.unslick ? dots : ""}
       </div>
 		)
 	}

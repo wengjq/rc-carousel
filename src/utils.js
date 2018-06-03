@@ -4,7 +4,6 @@ import ReactDOM from "react-dom";
 export const getWidth = elem => (elem && elem.offsetWidth) || 0;
 
 export const checkBrowser = {
-	touch: ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch,
 	transitions: (function(c) {
 	  var props = ['transitionProperty', 'WebkitTransition', 'MozTransition', 'OTransition', 'msTransition'];
 	  for ( var i in props ) if (c.style[ props[i] ] !== undefined) return true;
@@ -14,11 +13,11 @@ export const checkBrowser = {
 
 export const getCircleIndex = (index, slideCount) => (slideCount + (index % slideCount)) % slideCount;
 
-export const moveSlide = (index, dist, speed, style) => {
+export const moveSlide = (index, dist, speed, style, isNextSlide) => {
 	style.WebkitTransitionDuration = speed + 'ms';
 	style.msTransitionDuration = speed + 'ms';
 	style.transitionDuration = speed + 'ms';
-
+  
 	style.WebkitTransform = 'translate3d(' + dist + 'px, 0, 0)';
 	style.msTransform = 'translateX(' + dist + 'px)';
 	style.transform = 'translate3d(' + dist + 'px, 0, 0)';
@@ -53,7 +52,6 @@ export const getTrackCSS = spec => {
     msTransform
   };
 
-  if (spec.fade) style = { opacity: 1 };
   if (trackWidth) style.width = trackWidth;
   if (trackHeight) style.height = trackHeight;
 
@@ -69,6 +67,12 @@ export const initializedState = spec => {
   let previousIndex = getCircleIndex(currentSlide - 1, slideCount);
   let nextIndex = getCircleIndex(currentSlide + 1, slideCount);
   let slidePostionList = [];
+  let isSpecialSlideCount = spec.isSpecialSlideCount;
+
+  if (slideCount === 2) {
+    slideCount = 2 * slideCount;
+    isSpecialSlideCount = true;
+  }
 
   for (let i = 0; i < slideCount; i++) {
     let dist = currentSlide > i ? -slideWidth : (currentSlide < i ? slideWidth : 0);
@@ -84,7 +88,8 @@ export const initializedState = spec => {
     listWidth,
     trackWidth,
     currentSlide,
-    slidePostionList
+    slidePostionList,
+    isSpecialSlideCount
   };
 
   return state;
@@ -106,7 +111,6 @@ export const swipeStart = (e, spec) => {
 };
 
 export const swipeMove = (e, spec) => {
-  //if (e.touches.length > 1 || e.scale && e.scale !== 1) return;
   let touchMove =  {
     endX: e.touches ? e.touches[0].pageX : e.clientX,
     endY: e.touches ? e.touches[0].pageY : e.clientY
@@ -134,13 +138,11 @@ export const swipeMove = (e, spec) => {
   }
 
   // determine if scrolling test has run
-  if (typeof isScrolling == 'undefined') {
-    isScrolling = !!(isScrolling || Math.abs(delta.x) < Math.abs(delta.y));
-  }
+  isScrolling = !!(isScrolling || Math.abs(delta.y) < Math.abs(delta.x));
 
   let swipeDist = delta.x;
-
-  if (!isScrolling) {
+  
+  if (isScrolling) {
     slidePostionList[lastIndex] = swipeDist + slidePostionListTmp[lastIndex];
     slidePostionList[currentIndex] = swipeDist + slidePostionListTmp[currentIndex];
     slidePostionList[nextIndex] = swipeDist + slidePostionListTmp[nextIndex];
@@ -160,18 +162,24 @@ export const swipeMove = (e, spec) => {
 export const swipeEnd = (e, spec) => {
   let state = {};
   let dragging = spec.dragging;
-
-  if (!dragging) {
-    e.preventDefault();
-    return {};
-  }
+  let isScrolling = spec.isScrolling;
+  let slidePostionList = spec.slidePostionList;
+  
   state = {
     dragging: false,
     touchObject: {},
-    speed: spec.speedTmp
+    speed: spec.speedTmp,
+    slidePostionList,
+    autoplaying: "end",
+    isScrolling: false
   };
 
+  if (!dragging || !isScrolling) {
+    e.preventDefault();
+    return state;
+  }
   let delta = spec.delta;
+
   let duration = (+new Date) - spec.startTime;
   let slideWidth = spec.slideWidth;
   let slideCount = spec.slideCount;
@@ -182,10 +190,8 @@ export const swipeEnd = (e, spec) => {
 
   // determine direction of swipe (true:right, false:left)
   let direction = delta.x < 0;
-  let isScrolling = spec.isScrolling;
 
   let currentSlide = spec.currentSlide;
-  let slidePostionList = spec.slidePostionList;
   let slidePostionListTmp = spec.slidePostionListTmp;
   
   if (isValidSlide) {
@@ -211,10 +217,14 @@ export const swipeEnd = (e, spec) => {
     slidePostionList[getCircleIndex(currentSlide, slideCount)] = 0;
     slidePostionList[getCircleIndex(currentSlide + 1, slideCount)] = slideWidth;
   }
+
   state = {
     ...state,
+    speed: spec.speedTmp,
     currentSlide,
-    slidePostionList
+    slidePostionList,
+    autoplaying: "end",
+    isScrolling: false
   };
 
   return state;
