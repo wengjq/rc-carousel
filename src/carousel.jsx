@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import InnerCarousel from "./inner-carousel";
+import InnerCarousel from './inner-carousel';
 
 export default class Carousel extends React.Component {
   static propTypes = {
@@ -17,26 +17,27 @@ export default class Carousel extends React.Component {
     prevArrow: PropTypes.string,
     pauseOnHover: PropTypes.bool,
     unslick: PropTypes.bool,
+    children: PropTypes.node.isRequired,
   };
-  
+
   static defaultProps = {
     initialSlide: 0,  // initialize the position of the carousel
     autoplay: false,  // automatic carousel
     autoplaySpeed: 3000, // automatic carousel interval
     speed: 300, // animation speed
-    appendDots: dots => <ul style={{display: 'block'}}>{dots}</ul>, // customize dot node
+    appendDots: dots => <ul style={{ display: 'block' }}>{dots}</ul>, // customize dot node
     dots: true, // open dots switch
     dotsClass: 'carousel-dots', // customize dot class
     customPaging: i => <button>{i + 1}</button>, // customize the children of each dot
     arrows: true, // open arrows switch
-    nextArrow: null, // customize the node of nextArrow  
-    prevArrow: null, // customize the node of prevArrow  
+    nextArrow: null, // customize the node of nextArrow
+    prevArrow: null, // customize the node of prevArrow
     pauseOnHover: false, // hover carousel pause
     unslick: false, // remove dots and arrows
   };
 
   render() {
-    let children = React.Children.toArray( this.props.children );
+    let children = React.Children.toArray(this.props.children);
 
     children = children.filter(child => {
       if (typeof child === 'string') {
@@ -55,6 +56,4 @@ export default class Carousel extends React.Component {
       </InnerCarousel>
     );
   }
-
 }
-

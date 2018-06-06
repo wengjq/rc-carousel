@@ -1,86 +1,98 @@
-"use strict";
-
-import React from "react";
-import classNames from "classnames";
+'use strict';
+import React from 'react';
+import PropTypes from 'prop-types';
 import {
-  checkBrowser,
   moveSlide,
-  getCircleIndex
-} from "./utils";
+  getCircleIndex,
+} from './utils';
 
-var renderSlides = function(spec) {
-  var slides = [];
-  var childrenCount = React.Children.count(spec.children);
-  var currentSlide = spec.currentSlide; 
-  var isSpecialSlideCount = spec.isSpecialSlideCount;
-  var slideWidth = spec.slideWidth;
-  var slideCount = spec.slideCount;
-  var speed = spec.speed;
-  var nextIndex = getCircleIndex(currentSlide + 1, slideCount);
+const getSlideStyle = function getSlideStyle(spec) {
+  const style = {};
+  const index = spec.index;
+  const slideWidth = spec.slideWidth;
+  const speed = spec.speed;
+  const dist = spec.slidePostionList[index];
+  const left = index * -slideWidth;
+
+  style.width = slideWidth;
+  style.left = `${left}px`;
+
+  // index, dist, speed
+  moveSlide(index, dist, speed, style);
+
+  return style;
+};
+
+const renderSlides = function renderSlides(spec) {
+  const slides = [];
+  const currentSlide = spec.currentSlide;
+  const isSpecialSlideCount = spec.isSpecialSlideCount;
+  const slideCount = spec.slideCount;
+  const nextIndex = getCircleIndex(currentSlide + 1, slideCount);
 
   React.Children.forEach(spec.children, (child, index) => {
-    const slideClass = child.props.className || "";
+    const slideClass = child.props.className || '';
 
-    var childStyle = getSlideStyle({ ...spec, index, nextIndex });
+    const childStyle = getSlideStyle({ ...spec, index, nextIndex });
 
     slides.push(
       React.cloneElement(child, {
-        "data-index": index,
+        'data-index': index,
         className: slideClass,
-        style: { outline: "none", userSelect: "none", ...(child.props.style || {}), ...childStyle },
+        style: {
+          outline: 'none',
+          userSelect: 'none',
+          ...(child.props.style || {}),
+          ...childStyle,
+        },
         onClick: e => {
-          child.props && child.props.onClick && child.props.onClick(e);
-        }
+          if (child.props && child.props.onClick) {
+            child.props.onClick(e);
+          }
+        },
       })
     );
   });
-  
+
   if (isSpecialSlideCount) {
     React.Children.forEach(spec.children, (child, index) => {
-      const slideClass = child.props.className || "";
+      const slideClass = child.props.className || '';
 
       index = index + 2;
 
-      var childStyle = getSlideStyle({ ...spec, index });
+      const childStyle = getSlideStyle({ ...spec, index });
 
       slides.push(
         React.cloneElement(child, {
           key: index,
-          "data-index": index,
+          'data-index': index,
           className: slideClass,
-          style: { outline: "none", userSelect: "none", ...(child.props.style || {}), ...childStyle },
+          style: {
+            outline: 'none',
+            userSelect: 'none',
+            ...(child.props.style || {}),
+            ...childStyle,
+          },
           onClick: e => {
-            child.props && child.props.onClick && child.props.onClick(e);
-          }
+            if (child.props && child.props.onClick) {
+              child.props.onClick(e);
+            }
+          },
         })
       );
     });
   }
 
   return slides;
-}
-
-var getSlideStyle = function(spec) {
-  var style = {};
-  var index = spec.index;
-  var slideWidth = spec.slideWidth;
-  var currentSlide = spec.currentSlide; 
-  var speed = spec.speed;
-  var dist = spec.slidePostionList[index];
-  var slideCount = spec.slideCount;
-
-  style.width = slideWidth;
-  
-  if (checkBrowser.transitions) {
-    style.left = (index * -slideWidth) + 'px';
-    // index, dist, speed
-    moveSlide(index, dist, speed, style);
-  }
-
-  return style;
 };
 
-export class Track extends React.Component {   
+export class Track extends React.Component {
+  static propTypes = {
+    onMouseEnter: PropTypes.func,
+    onMouseOver: PropTypes.func,
+    onMouseLeave: PropTypes.func,
+    trackStyle: PropTypes.object,
+  };
 
   render() {
     const slides = renderSlides(this.props);
