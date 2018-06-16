@@ -64,19 +64,21 @@ export const initializedState = spec => {
   const slidePostionList = [];
   let isSpecialSlideCount = spec.isSpecialSlideCount;
 
-  if (slideCount === 2) {
-    slideCount = 2 * slideCount;
-    isSpecialSlideCount = true;
-  }
+  if (slideCount !== 1) {
+    if (slideCount === 2) {
+      slideCount = 2 * slideCount;
+      isSpecialSlideCount = true;
+    }
 
-  for (let i = 0; i < slideCount; i++) {
-    const rightSlideWidth = currentSlide < i ? slideWidth : 0;
-    const dist = currentSlide > i ? -slideWidth : rightSlideWidth;
-    slidePostionList[i] = dist;
-  }
+    for (let i = 0; i < slideCount; i++) {
+      const rightSlideWidth = currentSlide < i ? slideWidth : 0;
+      const dist = currentSlide > i ? -slideWidth : rightSlideWidth;
+      slidePostionList[i] = dist;
+    }
 
-  slidePostionList[previousIndex] = -slideWidth;
-  slidePostionList[nextIndex] = slideWidth;
+    slidePostionList[previousIndex] = -slideWidth;
+    slidePostionList[nextIndex] = slideWidth;
+  }
 
   const state = {
     slideCount,

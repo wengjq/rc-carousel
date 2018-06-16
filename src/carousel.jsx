@@ -50,6 +50,10 @@ export default class Carousel extends React.Component {
 
     settings = { ...this.defaultProps, ...this.props };
 
+    if (children.length === 1) {
+      settings.unslick = true;
+    }
+
     return (
       <InnerCarousel {...settings}>
         {children}

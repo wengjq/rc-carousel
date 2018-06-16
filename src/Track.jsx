@@ -1,6 +1,7 @@
 'use strict';
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import {
   moveSlide,
   getCircleIndex,
@@ -13,12 +14,17 @@ const getSlideStyle = function getSlideStyle(spec) {
   const speed = spec.speed;
   const dist = spec.slidePostionList[index];
   const left = index * -slideWidth;
+  const slideCount = spec.slideCount;
 
-  style.width = slideWidth;
-  style.left = `${left}px`;
+  if (slideCount > 1) {
+    style.width = slideWidth;
+    style.left = `${left}px`;
 
-  // index, dist, speed
-  moveSlide(index, dist, speed, style);
+    // index, dist, speed
+    moveSlide(index, dist, speed, style);
+  } else {
+    style.width = '100%';
+  }
 
   return style;
 };
@@ -31,12 +37,15 @@ const renderSlides = function renderSlides(spec) {
   const nextIndex = getCircleIndex(currentSlide + 1, slideCount);
 
   React.Children.forEach(spec.children, (child, index) => {
-    const slideClass = child.props.className || '';
+    const slideClass = classNames(child.props.className, {
+      'carousel-active': currentSlide === index,
+    });
 
     const childStyle = getSlideStyle({ ...spec, index, nextIndex });
 
     slides.push(
       React.cloneElement(child, {
+        key: index,
         'data-index': index,
         className: slideClass,
         style: {
@@ -56,9 +65,11 @@ const renderSlides = function renderSlides(spec) {
 
   if (isSpecialSlideCount) {
     React.Children.forEach(spec.children, (child, index) => {
-      const slideClass = child.props.className || '';
-
       index = index + 2;
+
+      const slideClass = classNames(child.props.className, {
+        'carousel-active': currentSlide === index,
+      });
 
       const childStyle = getSlideStyle({ ...spec, index });
 

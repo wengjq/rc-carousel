@@ -10,17 +10,18 @@ class SimpleDemo extends React.Component {
       autoplay: false,
       dots: true,
       arrows: true,
+      initialSlide: 2,
     };
 
     return (
       <Carousel {...settings}>
-        <div style={{ float: 'left', position: 'relative' }}>
+        <div className="carousel-slide" >
           <h3>1</h3>
         </div>
-        <div style={{ float: 'left', position: 'relative' }}>
+        <div className="carousel-slide" >
           <h3>2</h3>
         </div>
-        <div style={{ float: 'left', position: 'relative' }}>
+        <div className="carousel-slide" >
           <h3>3</h3>
         </div>
       </Carousel>
