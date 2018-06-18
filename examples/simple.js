@@ -10,7 +10,7 @@ class SimpleDemo extends React.Component {
       autoplay: false,
       dots: true,
       arrows: true,
-      initialSlide: 2,
+      initialSlide: 0,
     };
 
     return (
