@@ -27,9 +27,6 @@ class SimpleDemo extends React.Component {
         <div className="carousel-slide" >
           <h3>4</h3>
         </div>
-        <div className="carousel-slide" >
-          <h3>5</h3>
-        </div>
       </Carousel>
     );
   }
