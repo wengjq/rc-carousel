@@ -1,0 +1,138 @@
+body {
+  width: 80%;
+  margin: auto;
+}
+.carousel-initialized {
+  position: relative;
+  margin: 30px auto 50px;
+}
+.carousel-list {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+.carousel-track {
+  position: relative;
+  top: 0;
+  left: 0;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  overflow: hidden;
+}
+.carousel-dots {
+  position: absolute;
+  bottom: -25px;
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  list-style: none;
+}
+.carousel-dots li {
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin: 0 5px;
+  padding: 0;
+  cursor: pointer;
+}
+.carousel-dots li button {
+  font-size: 0;
+  line-height: 0;
+  display: block;
+  width: 20px;
+  height: 20px;
+  padding: 5px;
+  cursor: pointer;
+  color: transparent;
+  border: 0;
+  outline: none;
+  background: transparent;
+}
+.carousel-dots li button:before {
+  font-family: 'slick';
+  font-size: 38px;
+  line-height: 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  content: '\2022';
+  text-align: center;
+  opacity: .25;
+  color: black;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.carousel-dots li.carousel-active button:before,
+.carousel-dots li button:hover:before,
+.carousel-dots li button:focus:before {
+  opacity: 1;
+}
+h3 {
+  background: #00558B;
+  color: #fff;
+  font-size: 36px;
+  line-height: 100px;
+  padding: 2%;
+  position: relative;
+  text-align: center;
+}
+.carousel-arrow {
+  background-color: black;
+  opacity: 0.25;
+}
+.carousel-arrow:hover {
+  opacity: 1;
+}
+.carousel-prev {
+  left: -60px;
+}
+.carousel-next {
+  right: -60px;
+}
+.carousel-prev,
+.carousel-next {
+  font-size: 0;
+  line-height: 0;
+  position: absolute;
+  top: 50%;
+  display: block;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  -webkit-transform: translate(0, -50%);
+  -ms-transform: translate(0, -50%);
+  transform: translate(0, -50%);
+  cursor: pointer;
+  color: transparent;
+  border: none;
+  outline: none;
+  border-radius: 50%;
+}
+.carousel-next:before {
+  content: '\2192';
+}
+.carousel-prev:before {
+  content: '\2190';
+}
+.carousel-prev:before,
+.carousel-next:before {
+  font-size: 20px;
+  line-height: 1;
+  color: white;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.carousel-slide {
+  position: relative;
+  float: left;
+}
+
+/*# sourceMappingURL=simple.css.map*/
