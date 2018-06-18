@@ -37,7 +37,7 @@ matrix:
 deploy:
   provider: pages
   local_dir: build
-  repo: wengjq/wengjq.github.io/GithubPage/rt-carousel
+  repo: wengjq/wengjq.github.io
   skip_cleanup: true
   github_token: $GIT
   on:
