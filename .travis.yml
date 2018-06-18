@@ -29,9 +29,17 @@ env:
   matrix:
   - TEST_TYPE=lint
   - TEST_TYPE=test
-  - TEST_TYPE=coverage
-
 
 matrix:
   allow_failures:
   - env: "TEST_TYPE=saucelabs"
+
+deploy:
+  provider: pages
+  local_dir: public
+  repo: wengjq/https://wengjq.github.io/GithubPage/rt-carousel
+  skip_cleanup: true
+  github_token: $GIT
+  on:
+    branch: master
+  target_branch: gh-pages
