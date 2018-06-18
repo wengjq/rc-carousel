@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Carousel from 'rc-carousel';
-import 'rc-carousel/assets/index.less';
+import Carousel from 'rt-carousel';
+import 'rt-carousel/assets/index.less';
 
 class SimpleDemo extends React.Component {
   render() {
@@ -26,6 +26,12 @@ class SimpleDemo extends React.Component {
         </div>
         <div className="carousel-slide" >
           <h3>4</h3>
+        </div>
+        <div className="carousel-slide" >
+          <h3>5</h3>
+        </div>
+        <div className="carousel-slide" >
+          <h3>6</h3>
         </div>
       </Carousel>
     );

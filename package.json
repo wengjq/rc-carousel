@@ -1,5 +1,5 @@
 {
-  "name": "rc-carousel",
+  "name": "rt-carousel",
   "version": "1.0.0",
   "description": "carousel component for react",
   "main": "lib/index",
