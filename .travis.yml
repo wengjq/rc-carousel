@@ -12,7 +12,8 @@ node_js:
 deploy:
   provider: pages
   local_dir: build
-  repo: wengjq/GithubPage/rt-carousel
+  repo: wengjq/GithubPage
+  project-name: rt-carousel
   skip_cleanup: true
   github_token: $GIT
   on:
