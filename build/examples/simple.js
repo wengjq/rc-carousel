@@ -1182,9 +1182,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react_dom__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react_dom___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_react_dom__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rc_carousel__ = __webpack_require__(29);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rc_carousel_assets_index_less__ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rc_carousel_assets_index_less___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_rc_carousel_assets_index_less__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rt_carousel__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rt_carousel_assets_index_less__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rt_carousel_assets_index_less___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_rt_carousel_assets_index_less__);
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -1215,7 +1215,7 @@ var SimpleDemo = function (_React$Component) {
     };
 
     return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-      __WEBPACK_IMPORTED_MODULE_2_rc_carousel__["a" /* default */],
+      __WEBPACK_IMPORTED_MODULE_2_rt_carousel__["a" /* default */],
       settings,
       __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
         'div',
@@ -1251,6 +1251,15 @@ var SimpleDemo = function (_React$Component) {
           'h3',
           null,
           '4'
+        )
+      ),
+      __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+        'div',
+        { className: 'carousel-slide' },
+        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+          'h3',
+          null,
+          '5'
         )
       )
     );
