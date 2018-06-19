@@ -1,7 +1,7 @@
 # rt-carousel
 一个 react 轮播组件
 
-### Example
+### Usage
 
 ```js
 import React from "react";
