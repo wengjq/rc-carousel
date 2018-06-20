@@ -148,7 +148,7 @@ npm start
 
 http://localhost:8001/examples/
 
-online example: http://react-component.github.io/checkbox/examples/
+online example: https://wengjq.github.io/GithubPage/rt-carousel/
 
 ## Test Case
 
